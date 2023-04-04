@@ -1,5 +1,6 @@
 import math, numpy as np
 import copy
+import csv
 
 '''
 This Node class takes itself and a parent node. This node is used to build the decision
@@ -30,14 +31,24 @@ This function takes in a file and creates a matrix of voting records for each
 representative
 '''
 def makeMatrix(file):
-    matrix = []
-    with open(file, 'r') as file:
-        for line in file:
+    matrix1 = []
+    matrix2 = []
+    
+    with open(file) as file:
+        count = 0
+        tsvFile = csv.reader(file, delimiter='\t')
+        for line in tsvFile:
+            num = count % 4
             row = []
-            for elem in line.split():
+            for elem in line:
                 row.append(elem)
-            matrix.append(row)
-    return matrix
+            if num == 0:
+                matrix2.append(row)
+            else:
+                matrix1.append(row)
+            count += 1
+
+    return matrix1, matrix2
 
 '''
 This function takes the numerators and the denominators for the entropy function
@@ -385,7 +396,7 @@ def accuracy(node, representatives):
 ##################     MAIN FUNCTION   ####################
 ###########################################################
 def main():
-    data = makeMatrix('data.txt')
+    data, tuneData = makeMatrix('voting-data.tsv')
     representative = []
     for i, elem in enumerate(data):
         newRep = Representative(elem[0], elem[1], elem[2])
@@ -399,7 +410,6 @@ def main():
     print()
     
     # BUILD AND PRINT TREE AFTER PRUNING
-    tuneData = makeMatrix('tuning.txt')
     newRoot = completelyPruned(treeRoot, tuneData)
     print("THE PRUNED TREE: ")
     printTree(newRoot)
